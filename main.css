@@ -33,12 +33,12 @@
 }
 
 .dark-background {
-  --background-color: #1d1255;
+  //--background-color: #1d1255;
   --default-color: #ffffff;
   --heading-color: #ffffff;
   --surface-color: #4668a2;
   --contrast-color: #ffffff;
-  --background: radial-gradient(circle, rgba(158, 72, 204, 1) -7%, rgba(11, 26, 101, 1) 66%);
+  background: radial-gradient(circle, rgba(158, 72, 204, 1) -7%, rgba(11, 26, 101, 1) 66%);
 }
 
 /* Smooth scroll */
