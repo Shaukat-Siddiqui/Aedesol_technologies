@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -48,9 +48,8 @@
     </div>
 
     <script>
-        const baseURL = "https://api.aimlapi.com/v1";
-        const apiKey = "ef564edaa0d04ab39e1e1f501070b3b6";
-        const systemPrompt = "You are a helpful AI assistant that provides general information and engages in conversation on any topic.";
+        const baseURL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
+        const apiKey = "AIzaSyB1zmpZcbuvracCSGAtY5hu-of86i4_E_c";
 
         async function sendMessage() {
             const userPrompt = document.getElementById("user-input").value;
@@ -60,25 +59,20 @@
             document.getElementById("user-input").value = "";
 
             try {
-                const response = await fetch(`${baseURL}/chat/completions`, {
+                const response = await fetch(`${baseURL}?key=${apiKey}`, {
                     method: "POST",
                     headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${apiKey}`
+                        "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
-                        model: "mistralai/Mistral-7B-Instruct-v0.2",
-                        messages: [
-                            { role: "system", content: systemPrompt },
-                            { role: "user", content: userPrompt }
-                        ],
-                        temperature: 0.7,
-                        max_tokens: 256
+                        contents: [{
+                            parts: [{ text: userPrompt }]
+                        }]
                     })
                 });
 
                 const data = await response.json();
-                const aiMessage = data.choices[0].message.content;
+                const aiMessage = data.candidates[0].content.parts[0].text;
                 displayMessage(aiMessage, 'ai-message');
             } catch (error) {
                 displayMessage("Error: Unable to fetch response", 'ai-message');
