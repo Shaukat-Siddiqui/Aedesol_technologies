@@ -37,6 +37,17 @@
             border-bottom: 2px solid #ccc;
             display: flex;
             flex-direction: column;
+            overflow-y: auto;
+            position: relative;
+        }
+        .placeholder-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: gray;
+            font-size: 14px;
+            font-style: italic;
         }
         .message {
             margin-bottom: 15px;
@@ -70,6 +81,17 @@
             background-color: #28a745;
             border: none;
         }
+        .thinking {
+            font-style: italic;
+            color: gray;
+            animation: dots 1.5s infinite;
+        }
+        @keyframes dots {
+            0% { content: "Thinking"; }
+            33% { content: "Thinking."; }
+            66% { content: "Thinking.."; }
+            100% { content: "Thinking..."; }
+        }
     </style>
 </head>
 <body>
@@ -77,10 +99,11 @@
         <img src="Images/Aedesol_Main_Logo.jpg" alt="Aedesol Logo" class="logo">
         <h3 class="text-center">Aedesol AI Assistance</h3>
         <div id="chat-box" class="chat-box">
+            <div id="placeholder" class="placeholder-text">Intiate the chat by entering your prompt...</div>
             <div class="message ai-message">I am a large language model. How may I assist you?</div>
         </div>
         <div class="input-group">
-            <input type="text" id="user-input" class="form-control" placeholder="Type your message...">
+            <input type="text" id="user-input" class="form-control" placeholder="Type your prompt..." onkeypress="handleKeyPress(event)">
             <button class="btn btn-success" onclick="sendMessage()">Send</button>
         </div>
     </div>
@@ -88,12 +111,30 @@
     <script>
         const backendURL = "https://fixibo.onrender.com/chat";
 
-        async function sendMessage() {
-            const userPrompt = document.getElementById("user-input").value;
-            if (!userPrompt.trim()) return;
+        function handleKeyPress(event) {
+            if (event.key === "Enter") {
+                sendMessage();
+            }
+        }
 
+        async function sendMessage() {
+            const userInput = document.getElementById("user-input");
+            const chatBox = document.getElementById("chat-box");
+            const placeholder = document.getElementById("placeholder");
+            const userPrompt = userInput.value.trim();
+
+            if (!userPrompt) return;
+
+            placeholder.style.display = "none";
             displayMessage(userPrompt, 'user-message');
-            document.getElementById("user-input").value = "";
+            userInput.value = "";
+
+            // Display "Thinking..." message
+            const thinkingMessage = document.createElement("div");
+            thinkingMessage.classList.add("message", "ai-message", "thinking");
+            thinkingMessage.innerText = "Thinking...";
+            chatBox.appendChild(thinkingMessage);
+            chatBox.scrollTop = chatBox.scrollHeight;
 
             try {
                 const response = await fetch(backendURL, {
@@ -102,8 +143,10 @@
                     body: JSON.stringify({ prompt: userPrompt })
                 });
                 const data = await response.json();
+                chatBox.removeChild(thinkingMessage); // Remove "Thinking..." message
                 displayOrganizedMessage(data.reply);
             } catch (error) {
+                chatBox.removeChild(thinkingMessage);
                 displayMessage("Error: Unable to fetch response", 'ai-message');
             }
         }
