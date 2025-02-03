@@ -7,48 +7,86 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            background-color: #f8f9fa;
+            background-color: #eef2f7;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            overflow-y: auto;
         }
-
         .chat-container {
             max-width: 600px;
-            margin: 50px auto;
+            width: 100%;
             background: white;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
         }
-
+        .logo {
+            display: block;
+            margin: 0 auto 10px;
+            width: 100px;
+        }
+        .chat-box {
+            min-height: 400px;
+            width: 100%;
+            padding: 10px;
+            border-bottom: 2px solid #ccc;
+            display: flex;
+            flex-direction: column;
+        }
         .message {
             margin-bottom: 15px;
             padding: 10px;
-            border-radius: 5px;
+            border-radius: 10px;
+            max-width: 75%;
+            word-wrap: break-word;
         }
-
         .user-message {
             background-color: #007bff;
             color: white;
+            align-self: flex-end;
+            border-radius: 10px 10px 0 10px;
             text-align: right;
         }
-
         .ai-message {
             background-color: #e9ecef;
+            color: black;
+            align-self: flex-start;
+            border-radius: 10px 10px 10px 0;
             text-align: left;
+        }
+        .input-group {
+            margin-top: 10px;
+        }
+        #user-input {
+            background-color: #d1ecf1;
+            text-align: right;
+        }
+        button {
+            background-color: #28a745;
+            border: none;
         }
     </style>
 </head>
 <body>
     <div class="chat-container">
-        <h3 class="text-center">Aedesol AI Chatbot</h3>
-        <div id="chat-box" class="mb-3"></div>
+        <img src="assets/img/Aedesol_Logo.png" alt="Aedesol Logo" class="logo">
+        <h3 class="text-center">Aedesol AI Assistance</h3>
+        <div id="chat-box" class="chat-box">
+            <div class="message ai-message">I am a large language model. How may I assist you?</div>
+        </div>
         <div class="input-group">
             <input type="text" id="user-input" class="form-control" placeholder="Type your message...">
-            <button class="btn btn-primary" onclick="sendMessage()">Send</button>
+            <button class="btn btn-success" onclick="sendMessage()">Send</button>
         </div>
     </div>
 
     <script>
-        const backendURL = "https://fixibo.onrender.com/chat"; 
+        const backendURL = "https://fixibo.onrender.com/chat";
 
         async function sendMessage() {
             const userPrompt = document.getElementById("user-input").value;
@@ -63,20 +101,36 @@
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ prompt: userPrompt })
                 });
-
                 const data = await response.json();
-                displayMessage(data.reply, 'ai-message');
+                displayOrganizedMessage(data.reply);
             } catch (error) {
                 displayMessage("Error: Unable to fetch response", 'ai-message');
             }
         }
-
 
         function displayMessage(text, className) {
             const chatBox = document.getElementById("chat-box");
             const messageDiv = document.createElement("div");
             messageDiv.classList.add("message", className);
             messageDiv.innerText = text;
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function displayOrganizedMessage(text) {
+            const chatBox = document.getElementById("chat-box");
+            const messageDiv = document.createElement("div");
+            messageDiv.classList.add("message", "ai-message");
+            
+            let formattedText = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+            const points = formattedText.split("\n").filter(point => point.trim() !== "").map(point => `<li>${point}</li>`).join('');
+            
+            if (points) {
+                messageDiv.innerHTML = `<ul>${points}</ul>`;
+            } else {
+                messageDiv.innerHTML = formattedText;
+            }
+            
             chatBox.appendChild(messageDiv);
             chatBox.scrollTop = chatBox.scrollHeight;
         }
