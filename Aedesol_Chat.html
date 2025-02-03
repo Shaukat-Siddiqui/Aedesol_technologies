@@ -48,8 +48,7 @@
     </div>
 
     <script>
-        const baseURL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
-        const apiKey = "AIzaSyB1zmpZcbuvracCSGAtY5hu-of86i4_E_c";
+        const backendURL = "https://aedesol-technologies.onrender.com/chat"; 
 
         async function sendMessage() {
             const userPrompt = document.getElementById("user-input").value;
@@ -59,25 +58,19 @@
             document.getElementById("user-input").value = "";
 
             try {
-                const response = await fetch(`${baseURL}?key=${apiKey}`, {
+                const response = await fetch(backendURL, {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        contents: [{
-                            parts: [{ text: userPrompt }]
-                        }]
-                    })
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ prompt: userPrompt })
                 });
 
                 const data = await response.json();
-                const aiMessage = data.candidates[0].content.parts[0].text;
-                displayMessage(aiMessage, 'ai-message');
+                displayMessage(data.reply, 'ai-message');
             } catch (error) {
                 displayMessage("Error: Unable to fetch response", 'ai-message');
             }
         }
+
 
         function displayMessage(text, className) {
             const chatBox = document.getElementById("chat-box");
