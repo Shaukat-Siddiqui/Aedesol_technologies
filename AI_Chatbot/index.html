@@ -3,180 +3,304 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aedesol AI Chatbot</title>
+    <title>Aedesol AI Chatbot - Enhanced Design</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --user-message-bg: #007bff; /* Bootstrap primary blue */
+            --ai-message-bg: #e9ecef;   /* Bootstrap light gray */
+            --body-bg: #f4f7f6;         /* Lighter gray */
+            --container-bg: #ffffff;
+            --text-color-light: #ffffff;
+            --text-color-dark: #333333;
+            --border-color: #dee2e6;
+            --primary-font: 'Poppins', sans-serif;
+            --base-font-size: 16px;
+            --border-radius: 15px; /* Softer radius */
+            --container-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            --message-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+        }
+
         body {
-            background-color: #eef2f7;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            height: 100vh;
-            overflow-y: auto;
+            background-color: var(--body-bg);
+            font-family: var(--primary-font);
+            font-size: var(--base-font-size);
+            color: var(--text-color-dark);
+            margin: 0;
+            padding-top: 40px; /* Add space at the top */
+            padding-bottom: 40px; /* Add space at the bottom */
         }
+
         .chat-container {
-            max-width: 600px;
-            width: 100%;
-            background: white;
-            padding: 20px;
+            max-width: 700px; /* Slightly wider */
+            margin: auto;
+            background: var(--container-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--container-shadow);
+            display: flex;
+            flex-direction: column;
+            height: 85vh; /* More height */
+            overflow: hidden; /* Prevent content spilling */
+        }
+
+        .chat-header {
+            background-color: var(--user-message-bg);
+            color: var(--text-color-light);
+            padding: 15px 20px;
+            border-top-left-radius: var(--border-radius);
+            border-top-right-radius: var(--border-radius);
+            text-align: center;
+            font-weight: 500;
+            font-size: 1.1em;
+             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Header shadow */
+             z-index: 10; /* Ensure header is above chat box shadow */
+        }
+
+        #chat-box {
+            flex-grow: 1; /* Takes available space */
+            padding: 25px 20px;
+            overflow-y: auto; /* Enable scrolling */
+            background-color: #fdfdfd; /* Slightly off-white chat area */
+        }
+
+        /* Custom Scrollbar for WebKit Browsers */
+        #chat-box::-webkit-scrollbar {
+            width: 8px;
+        }
+        #chat-box::-webkit-scrollbar-track {
+            background: #f1f1f1;
             border-radius: 10px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-            margin-top: 20px;
-            display: flex;
-            flex-direction: column;
         }
-        .logo {
-            display: block;
-            margin: 0 auto 10px;
-            width: 100px;
+        #chat-box::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 10px;
         }
-        .chat-box {
-            min-height: 400px;
-            width: 100%;
-            padding: 10px;
-            border-bottom: 2px solid #ccc;
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-            position: relative;
+        #chat-box::-webkit-scrollbar-thumb:hover {
+            background: #aaa;
         }
-        .placeholder-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: gray;
-            font-size: 14px;
-            font-style: italic;
-        }
+
         .message {
-            margin-bottom: 15px;
-            padding: 10px;
-            border-radius: 10px;
-            max-width: 75%;
-            word-wrap: break-word;
+            margin-bottom: 20px; /* Increased spacing */
+            padding: 12px 18px; /* More padding */
+            border-radius: var(--border-radius);
+            max-width: 75%; /* Max width for bubbles */
+            line-height: 1.5;
+            position: relative; /* Needed for pseudo-element tails */
+            box-shadow: var(--message-shadow);
+            word-wrap: break-word; /* Prevent long words from overflowing */
         }
+
         .user-message {
-            background-color: #007bff;
-            color: white;
-            align-self: flex-end;
-            border-radius: 10px 10px 0 10px;
-            text-align: right;
+            background-color: var(--user-message-bg);
+            color: var(--text-color-light);
+            margin-left: auto; /* Align to right */
+            border-bottom-right-radius: 5px; /* Sharper corner for tail */
         }
+         /* User message tail */
+        .user-message::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: -10px; /* Position tail outside the bubble */
+            width: 0;
+            height: 0;
+            border: 15px solid transparent; /* Size of the tail */
+            border-left-color: var(--user-message-bg);
+            border-right: 0;
+            border-bottom: 0;
+            margin-top: -10px; /* Adjust vertical position */
+        }
+
+
         .ai-message {
-            background-color: #e9ecef;
-            color: black;
-            align-self: flex-start;
-            border-radius: 10px 10px 10px 0;
-            text-align: left;
+            background-color: var(--ai-message-bg);
+            color: var(--text-color-dark);
+            margin-right: auto; /* Align to left */
+            border-bottom-left-radius: 5px; /* Sharper corner for tail */
         }
-        .input-group {
-            margin-top: 10px;
+         /* AI message tail */
+        .ai-message::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: -10px; /* Position tail outside the bubble */
+            width: 0;
+            height: 0;
+            border: 15px solid transparent; /* Size of the tail */
+            border-right-color: var(--ai-message-bg);
+            border-left: 0;
+            border-bottom: 0;
+            margin-top: -10px; /* Adjust vertical position */
         }
+
+        .chat-input-area {
+            padding: 15px 20px;
+            border-top: 1px solid var(--border-color);
+            background-color: var(--container-bg);
+             box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.05); /* Shadow above input */
+             z-index: 5; /* Ensure input area is above chat box scroll content */
+             border-bottom-left-radius: var(--border-radius);
+             border-bottom-right-radius: var(--border-radius);
+        }
+
+        .input-group { /* Using flex for better alignment */
+            display: flex;
+            align-items: center;
+        }
+
         #user-input {
-            background-color: #d1ecf1;
-            text-align: right;
+            flex-grow: 1;
+            border-radius: 20px; /* Pill shape */
+            border: 1px solid var(--border-color);
+            padding: 10px 20px; /* More padding */
+            margin-right: 10px;
+            font-size: 0.95em;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
-        button {
-            background-color: #28a745;
+
+        #user-input:focus {
+            outline: none;
+            border-color: var(--user-message-bg);
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+
+        .send-button { /* Custom class for the button */
+            border-radius: 50%; /* Circle button */
+            width: 45px;
+            height: 45px;
+            background-color: var(--user-message-bg);
+            color: white;
             border: none;
+            font-size: 1.3em; /* Adjust icon size if using */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            flex-shrink: 0; /* Prevent button from shrinking */
         }
-        .thinking {
-            font-style: italic;
-            color: gray;
-            animation: dots 1.5s infinite;
+
+        .send-button:hover {
+            background-color: #0056b3; /* Darker blue on hover */
         }
-        @keyframes dots {
-            0% { content: "Thinking"; }
-            33% { content: "Thinking."; }
-            66% { content: "Thinking.."; }
-            100% { content: "Thinking..."; }
+         .send-button:active {
+            transform: scale(0.95); /* Click effect */
+         }
+
+        /* Simple send icon using SVG (inline) */
+        .send-icon {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
         }
+
     </style>
 </head>
 <body>
     <div class="chat-container">
-        <img src="Images/Aedesol_Main_Logo.jpg" alt="Aedesol Logo" class="logo">
-        <h3 class="text-center">Aedesol AI Assistance</h3>
-        <div id="chat-box" class="chat-box">
-            <div id="placeholder" class="placeholder-text">Initiate the chat by entering your prompt...</div>
-            <div class="message ai-message">I am a large language model. How may I assist you?</div>
+        <div class="chat-header">
+            Aedesol AI Assistant
         </div>
-        <div class="input-group">
-            <input type="text" id="user-input" class="form-control" placeholder="Type your prompt..." onkeypress="handleKeyPress(event)">
-            <button class="btn btn-success" onclick="sendMessage()">Send</button>
+        <div id="chat-box">
+            <div class="message ai-message">Hello! How can I help you today?</div>
+        </div>
+        <div class="chat-input-area">
+            <div class="input-group">
+                <input type="text" id="user-input" class="form-control" placeholder="Type your message here...">
+                 <button class="send-button" onclick="sendMessage()" aria-label="Send Message">
+                    <svg class="send-icon" viewBox="0 0 24 24">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                    </svg>
+                </button>
+            </div>
         </div>
     </div>
 
     <script>
         const backendURL = "https://fixibo.onrender.com/chat";
+        const chatBox = document.getElementById("chat-box");
+        const userInput = document.getElementById("user-input");
 
-        function handleKeyPress(event) {
+        // Send message on button click
+        // (The button now calls sendMessage directly via onclick)
+
+        // Send message on Enter key press
+        userInput.addEventListener("keypress", function(event) {
+            // Check if the key pressed was 'Enter'
             if (event.key === "Enter") {
+                // Prevent the default action (like form submission if it was in a form)
+                event.preventDefault();
+                // Trigger the send message function
                 sendMessage();
             }
-        }
+        });
+
 
         async function sendMessage() {
-            const userInput = document.getElementById("user-input");
-            const chatBox = document.getElementById("chat-box");
-            const placeholder = document.getElementById("placeholder");
-            const userPrompt = userInput.value.trim();
+            const userPrompt = userInput.value.trim(); // Trim whitespace
+            if (!userPrompt) return; // Don't send empty messages
 
-            if (!userPrompt) return;
-
-            placeholder.style.display = "none";
             displayMessage(userPrompt, 'user-message');
-            userInput.value = "";
-
-            // Display "Thinking..." message
-            const thinkingMessage = document.createElement("div");
-            thinkingMessage.classList.add("message", "ai-message", "thinking");
-            thinkingMessage.innerText = "Thinking...";
-            chatBox.appendChild(thinkingMessage);
-            chatBox.scrollTop = chatBox.scrollHeight;
+            userInput.value = ""; // Clear input field immediately
 
             try {
+                // Optional: Display a typing indicator here
+
                 const response = await fetch(backendURL, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ prompt: userPrompt })
                 });
+
+                if (!response.ok) {
+                    // Handle HTTP errors like 4xx, 5xx
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
                 const data = await response.json();
-                chatBox.removeChild(thinkingMessage); // Remove "Thinking..." message
-                displayOrganizedMessage(data.reply);
+
+                // Optional: Remove typing indicator here
+
+                // Check if the expected 'reply' field exists
+                if (data && data.reply) {
+                    displayMessage(data.reply, 'ai-message');
+                } else {
+                    // Handle cases where the response format is unexpected
+                    console.error("Unexpected response format:", data);
+                    displayMessage("Received an unexpected response from the server.", 'ai-message');
+                }
+
             } catch (error) {
-                chatBox.removeChild(thinkingMessage);
-                displayMessage("Error: Unable to fetch response", 'ai-message');
+                 // Optional: Remove typing indicator here
+                console.error("Fetch Error:", error); // Log the error for debugging
+                // Display a user-friendly error message
+                 displayMessage(`Error: Could not connect to the AI. Please check your connection or try again later. (${error.message})`, 'ai-message error-message'); // Added error-message class for potential specific styling
             }
         }
 
         function displayMessage(text, className) {
-            const chatBox = document.getElementById("chat-box");
             const messageDiv = document.createElement("div");
             messageDiv.classList.add("message", className);
-            messageDiv.innerText = text;
+            messageDiv.innerText = text; // Using innerText is safer against XSS
             chatBox.appendChild(messageDiv);
-            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // Scroll to the bottom smoothly
+            chatBox.scrollTo({
+                top: chatBox.scrollHeight,
+                behavior: 'smooth'
+            });
         }
 
-        function displayOrganizedMessage(text) {
-            const chatBox = document.getElementById("chat-box");
-            const messageDiv = document.createElement("div");
-            messageDiv.classList.add("message", "ai-message");
-            
-            let formattedText = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
-            const points = formattedText.split("\n").filter(point => point.trim() !== "").map(point => `<li>${point}</li>`).join('');
-            
-            if (points) {
-                messageDiv.innerHTML = `<ul>${points}</ul>`;
-            } else {
-                messageDiv.innerHTML = formattedText;
-            }
-            
-            chatBox.appendChild(messageDiv);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
+         // Optional: Add a specific style for error messages if needed
+         // .error-message { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+         // Initial focus on the input field when the page loads
+         window.onload = () => {
+             userInput.focus();
+         }
+
     </script>
 </body>
 </html>
