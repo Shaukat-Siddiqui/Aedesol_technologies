@@ -196,6 +196,37 @@
             fill: currentColor;
         }
 
+        /* -- Styling for Thinking Indicator -- */
+        #thinking-indicator {
+            display: flex; /* Use flex to align dots if needed */
+            align-items: baseline;
+        }
+        #thinking-indicator span {
+            display: inline-block; /* Needed for animation */
+            opacity: 0;
+            animation: blink 1.4s infinite;
+            margin-left: 1px; /* Spacing between dots */
+        }
+        #thinking-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        #thinking-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes blink {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+        /* -- End Thinking Indicator Styling -- */
+
+        /* Style for error messages */
+         .error-message {
+            background-color: #f8d7da !important; /* Make sure it overrides ai-message bg */
+            color: #721c24 !important;
+            border: 1px solid #f5c6cb;
+        }
+        /* Optional: Adjust tail color for errors */
+        .error-message::after {
+             border-right-color: #f8d7da !important;
+        }
+
     </style>
 </head>
 <body>
@@ -222,81 +253,135 @@
         const backendURL = "https://fixibo.onrender.com/chat";
         const chatBox = document.getElementById("chat-box");
         const userInput = document.getElementById("user-input");
+        const typingSpeed = 40; // Milliseconds per character (adjust speed as needed)
 
-        // Send message on button click
-        // (The button now calls sendMessage directly via onclick)
+        // --- Helper Functions ---
 
-        // Send message on Enter key press
-        userInput.addEventListener("keypress", function(event) {
-            // Check if the key pressed was 'Enter'
-            if (event.key === "Enter") {
-                // Prevent the default action (like form submission if it was in a form)
-                event.preventDefault();
-                // Trigger the send message function
-                sendMessage();
-            }
-        });
-
-
-        async function sendMessage() {
-            const userPrompt = userInput.value.trim(); // Trim whitespace
-            if (!userPrompt) return; // Don't send empty messages
-
-            displayMessage(userPrompt, 'user-message');
-            userInput.value = ""; // Clear input field immediately
-
-            try {
-                // Optional: Display a typing indicator here
-
-                const response = await fetch(backendURL, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ prompt: userPrompt })
-                });
-
-                if (!response.ok) {
-                    // Handle HTTP errors like 4xx, 5xx
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const data = await response.json();
-
-                // Optional: Remove typing indicator here
-
-                // Check if the expected 'reply' field exists
-                if (data && data.reply) {
-                    displayMessage(data.reply, 'ai-message');
-                } else {
-                    // Handle cases where the response format is unexpected
-                    console.error("Unexpected response format:", data);
-                    displayMessage("Received an unexpected response from the server.", 'ai-message');
-                }
-
-            } catch (error) {
-                 // Optional: Remove typing indicator here
-                console.error("Fetch Error:", error); // Log the error for debugging
-                // Display a user-friendly error message
-                 displayMessage(`Error: Could not connect to the AI. Please check your connection or try again later. (${error.message})`, 'ai-message error-message'); // Added error-message class for potential specific styling
-            }
-        }
-
-        function displayMessage(text, className) {
-            const messageDiv = document.createElement("div");
-            messageDiv.classList.add("message", className);
-            messageDiv.innerText = text; // Using innerText is safer against XSS
-            chatBox.appendChild(messageDiv);
-
-            // Scroll to the bottom smoothly
+        // Scrolls the chat box to the bottom smoothly
+        function scrollToBottom() {
             chatBox.scrollTo({
                 top: chatBox.scrollHeight,
                 behavior: 'smooth'
             });
         }
 
-         // Optional: Add a specific style for error messages if needed
-         // .error-message { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        // Displays a message instantly (used for user messages and errors)
+        function displayMessage(text, className) {
+            const messageDiv = document.createElement("div");
+            messageDiv.classList.add("message", className);
+            messageDiv.textContent = text; // Using textContent for safety against XSS
+            chatBox.appendChild(messageDiv);
+            scrollToBottom();
+            return messageDiv; // Return the created element
+        }
 
-         // Initial focus on the input field when the page loads
+        // Shows the "Thinking..." indicator
+        function showThinkingIndicator() {
+            const thinkingDiv = document.createElement("div");
+            thinkingDiv.id = "thinking-indicator"; // Assign ID for easy removal
+            thinkingDiv.classList.add("message", "ai-message"); // Style like AI message
+            // Use innerHTML for the spans needed for animation
+            thinkingDiv.innerHTML = 'Thinking<span>.</span><span>.</span><span>.</span>';
+            chatBox.appendChild(thinkingDiv);
+            scrollToBottom();
+        }
+
+        // Removes the "Thinking..." indicator
+        function hideThinkingIndicator() {
+            const thinkingDiv = document.getElementById("thinking-indicator");
+            if (thinkingDiv) {
+                thinkingDiv.remove();
+            }
+        }
+
+        // Displays the AI message with a typing effect
+        function displayAiMessageWithTyping(text) {
+            const messageDiv = document.createElement("div");
+            messageDiv.classList.add("message", "ai-message");
+            // Add empty div first
+            chatBox.appendChild(messageDiv);
+            scrollToBottom(); // Scroll when the empty bubble is added
+
+            let i = 0;
+            function typeChar() {
+                if (i < text.length) {
+                    // Append character - Use textContent to prevent XSS if the reply isn't guaranteed safe HTML
+                    messageDiv.textContent += text.charAt(i);
+                    i++;
+                    scrollToBottom(); // Keep scrolling as content grows
+                    setTimeout(typeChar, typingSpeed);
+                }
+                 // Optional: final scroll can be added here if needed, but continuous scroll should suffice.
+            }
+            typeChar(); // Start the typing animation
+        }
+
+        // --- Core Chat Logic ---
+
+        async function sendMessage() {
+            const userPrompt = userInput.value.trim();
+            if (!userPrompt) return;
+
+            displayMessage(userPrompt, 'user-message'); // Display user message instantly
+            userInput.value = ""; // Clear input
+            userInput.focus(); // Keep focus on input
+
+            showThinkingIndicator(); // Show "Thinking..."
+
+            try {
+                const response = await fetch(backendURL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ prompt: userPrompt })
+                });
+
+                hideThinkingIndicator(); // Hide "Thinking..." before displaying response or error
+
+                if (!response.ok) {
+                    // Handle HTTP errors (e.g., 404, 500)
+                    let errorText = `HTTP error! Status: ${response.status}`;
+                    try {
+                        // Try to get more specific error details from response body if available
+                        const errorData = await response.json();
+                        if (errorData && errorData.error) {
+                           errorText += ` - ${errorData.error}`;
+                        } else if (errorData && errorData.detail) {
+                           errorText += ` - ${errorData.detail}`;
+                        }
+                    } catch (e) {
+                        // Ignore if response body isn't JSON or empty
+                    }
+                    throw new Error(errorText);
+                }
+
+                const data = await response.json();
+
+                if (data && data.reply) {
+                    displayAiMessageWithTyping(data.reply); // Display AI response with typing effect
+                } else {
+                    console.error("Unexpected response format:", data);
+                    displayMessage("Received an unexpected response format from the server.", 'ai-message error-message');
+                }
+
+            } catch (error) {
+                 hideThinkingIndicator(); // Ensure indicator is hidden on fetch/network error too
+                 console.error("Fetch/Processing Error:", error);
+                 // Display a user-friendly error message instantly
+                 displayMessage(`Error: Could not get response. ${error.message}`, 'ai-message error-message');
+            }
+        }
+
+        // --- Event Listeners ---
+
+        // Send message on Enter key press in the input field
+        userInput.addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault(); // Prevent default Enter behavior (like form submission)
+                sendMessage();
+            }
+        });
+
+        // Initial focus on the input field when the page loads
          window.onload = () => {
              userInput.focus();
          }
